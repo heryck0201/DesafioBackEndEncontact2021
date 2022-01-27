@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-
 using System;
 using TesteBackendEnContact.Database;
 using TesteBackendEnContact.Repository;
@@ -31,14 +30,25 @@ namespace TesteBackendEnContact
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TesteBackendEnContact", Version = "v1" });
             });
 
+            //Conectar arquivo local
+            //services.AddFluentMigratorCore()
+            //      .ConfigureRunner(rb => rb
+            //          .AddSQLite()
+            //          .WithGlobalConnectionString(Configuration.GetConnectionString("DefaultConnection"))
+            //          .ScanIn(typeof(Startup).Assembly).For.Migrations())
+            //      .AddLogging(lb => lb.AddFluentMigratorConsole());
+
+            //services.AddSingleton(new DatabaseConfig { ConnectionString = Configuration.GetConnectionString("DefaultConnection") });
+
+            //Para conectar no servidor SQL server
             services.AddFluentMigratorCore()
                     .ConfigureRunner(rb => rb
-                        .AddSQLite()
-                        .WithGlobalConnectionString(Configuration.GetConnectionString("DefaultConnection"))
-                        .ScanIn(typeof(Startup).Assembly).For.Migrations())
+                        .AddSqlServer()
+                        .WithGlobalConnectionString(Configuration.GetConnectionString("DefaultConnectionServer").Replace("Initial Catalog = *", "Initial Catalog = " + Configuration.GetConnectionString("NameBD")))
+                        .ScanIn(typeof(Startup).Assembly).For.All())
                     .AddLogging(lb => lb.AddFluentMigratorConsole());
+            services.AddSingleton(new DatabaseConfig(Configuration.GetConnectionString("DefaultConnectionServer"), Configuration.GetConnectionString("NameBD")) { });
 
-            services.AddSingleton(new DatabaseConfig { ConnectionString = Configuration.GetConnectionString("DefaultConnection") });
             services.AddScoped<IContactBookRepository, ContactBookRepository>();
             services.AddScoped<ICompanyRepository, CompanyRepository>();
         }
