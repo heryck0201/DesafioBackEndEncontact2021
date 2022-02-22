@@ -1,12 +1,14 @@
 using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using TesteBackendEnContact.Database;
+using TesteBackendEnContact.Database.Context;
 using TesteBackendEnContact.Repository;
 using TesteBackendEnContact.Repository.Interface;
 
@@ -24,6 +26,7 @@ namespace TesteBackendEnContact
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ContactContext>(x => x.UseSqlite("Data source = contact.db"));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

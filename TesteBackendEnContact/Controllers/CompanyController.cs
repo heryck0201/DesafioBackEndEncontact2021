@@ -13,10 +13,15 @@ namespace TesteBackendEnContact.Controllers
     public class CompanyController : ControllerBase
     {
         private readonly ILogger<CompanyController> _logger;
-
+        private readonly ICompanyRepository _companyRepository;
         public CompanyController(ILogger<CompanyController> logger)
         {
             _logger = logger;
+        }
+
+        public CompanyController(ICompanyRepository companyRepository)
+        {
+            _companyRepository = companyRepository;
         }
 
         [HttpPost]
@@ -26,9 +31,13 @@ namespace TesteBackendEnContact.Controllers
         }
 
         [HttpDelete]
-        public async Task Delete(int id, [FromServices] ICompanyRepository companyRepository)
+        public async Task<ActionResult<ICompany>> DeleteAsync(int id, [FromServices] ICompanyRepository companyRepository)
         {
-            await companyRepository.DeleteAsync(id);
+            var company = await _companyRepository.GetAsync(id);
+            if (company == null)
+                return NotFound();
+            await _companyRepository.DeleteAsync(company.Id);
+            return NoContent();
         }
 
         [HttpGet]
@@ -38,9 +47,9 @@ namespace TesteBackendEnContact.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ICompany> Get(int id, [FromServices] ICompanyRepository companyRepository)
+        public async Task<ActionResult<ICompany>> GetCompany(int id/*, [FromServices] ICompanyRepository companyRepository*/)
         {
-            return await companyRepository.GetAsync(id);
+            return await _companyRepository.Get();
         }
     }
 }
